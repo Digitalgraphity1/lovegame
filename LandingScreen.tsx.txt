@@ -1,0 +1,29 @@
+
+import React from 'react';
+import { HeartIcon } from './icons/HeartIcon';
+
+interface LandingScreenProps {
+  onStart: () => void;
+}
+
+const LandingScreen: React.FC<LandingScreenProps> = ({ onStart }) => {
+  return (
+    <div className="animate-fadeIn flex flex-col items-center">
+      <HeartIcon className="w-24 h-24 text-red-500 animate-pulse drop-shadow-lg" />
+      <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold my-6 bg-clip-text text-transparent bg-gradient-to-r from-pink-200 via-red-300 to-purple-300 drop-shadow-sm">
+        Love Harmony Tester
+      </h1>
+      <p className="text-lg sm:text-xl mb-8 max-w-md text-slate-700">
+        Curious how in sync your hearts are? Answer a few fun questions and discover your couple's harmony score!
+      </p>
+      <button
+        onClick={onStart}
+        className="bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transform hover:scale-105 transition-all duration-300 text-xl"
+      >
+        Let's Play!
+      </button>
+    </div>
+  );
+};
+
+export default LandingScreen;

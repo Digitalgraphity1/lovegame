@@ -1,0 +1,63 @@
+
+import React, { useEffect, useState } from 'react';
+import { HeartIcon } from './icons/HeartIcon';
+
+interface HeartParticle {
+  id: number;
+  style: React.CSSProperties;
+  size: number;
+  color: string;
+}
+
+const createHeart = (id: number): HeartParticle => {
+  const size = Math.random() * 30 + 10; // 10px to 40px
+  const animationDuration = Math.random() * 5 + 8; // 8s to 13s
+  const animationDelay = Math.random() * 5; // 0s to 5s
+  const left = Math.random() * 100; // 0% to 100%
+  const colors = ['text-pink-500', 'text-red-500', 'text-purple-500', 'text-pink-400', 'text-red-400'];
+  const color = colors[Math.floor(Math.random() * colors.length)];
+
+  return {
+    id,
+    size,
+    color,
+    style: {
+      left: `${left}%`,
+      animationDuration: `${animationDuration}s`,
+      animationDelay: `${animationDelay}s`,
+      width: `${size}px`,
+      height: `${size}px`,
+    },
+  };
+};
+
+
+const HeartsBackground: React.FC = () => {
+  const [hearts, setHearts] = useState<HeartParticle[]>([]);
+
+  useEffect(() => {
+    const initialHearts = Array.from({ length: 20 }, (_, i) => createHeart(i));
+    setHearts(initialHearts);
+
+    // Optional: Cycle hearts for continuous effect, though CSS animation handles looping
+    // This could be used to regenerate hearts with new random properties if needed
+    // For now, CSS handles the continuous animation loop.
+  }, []);
+
+
+  return (
+    <div className="fixed inset-0 w-full h-full pointer-events-none z-0 overflow-hidden">
+      {hearts.map((heart) => (
+        <div
+          key={heart.id}
+          className={`heart-particle ${heart.color} opacity-50`}
+          style={heart.style}
+        >
+          <HeartIcon className="w-full h-full" />
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export default HeartsBackground;

@@ -1,0 +1,99 @@
+
+import React, { useEffect, useRef } from 'react';
+import { Question, QuestionOption } from '../types';
+import ProgressBar from './ProgressBar';
+
+interface QuestionScreenProps {
+  question: Question;
+  questionNumber: number;
+  totalQuestions: number;
+  onSubmitAnswer: (score: number) => void;
+  partner1Name: string;
+  partner2Name: string;
+}
+
+const QuestionScreen: React.FC<QuestionScreenProps> = ({
+  question,
+  questionNumber,
+  totalQuestions,
+  onSubmitAnswer,
+  partner1Name,
+  partner2Name,
+}) => {
+  const formatQuestionText = (text: string): string => {
+    return text.replace(/{partner1}/g, partner1Name).replace(/{partner2}/g, partner2Name);
+  };
+
+  const adContainerRef = useRef<HTMLDivElement>(null);
+  const adScriptKey = '335dbfb16faf973bd2007ed03f552ceb';
+  const adOptionsGlobalVarName = `atOptions_${adScriptKey}`;
+
+  useEffect(() => {
+    const adContainer = adContainerRef.current;
+    if (!adContainer) return;
+
+    // Ensure the container is empty before adding new ad elements
+    adContainer.innerHTML = '';
+
+    // 1. Set options on the window object
+    (window as any)[adOptionsGlobalVarName] = {
+      'key': adScriptKey,
+      'format': 'iframe',
+      'height': 60,
+      'width': 468,
+      'params': {}
+    };
+
+    // 2. Create and append the ad script
+    const script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = `//www.highperformanceformat.com/${adScriptKey}/invoke.js`;
+    script.async = true; 
+
+    adContainer.appendChild(script);
+    
+    const currentScript = script; // Capture script for cleanup
+
+    return () => {
+      // Cleanup on component unmount
+      if (currentScript && currentScript.parentNode === adContainer) {
+        adContainer.removeChild(currentScript);
+      }
+      // Clean up the ad container's content (e.g., iframes left by the script)
+      if (adContainer) {
+         adContainer.innerHTML = '';
+      }
+      delete (window as any)[adOptionsGlobalVarName];
+    };
+  }, [adOptionsGlobalVarName]); // Re-run if adOptionsGlobalVarName changes (it won't here, but good practice)
+
+  return (
+    <div className="animate-fadeIn flex flex-col items-center w-full">
+      <ProgressBar current={questionNumber} total={totalQuestions} />
+      <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold my-6 text-purple-700 leading-tight">
+        {formatQuestionText(question.text)}
+      </h2>
+      <div className="w-full space-y-3 sm:space-y-4">
+        {question.options.map((option: QuestionOption, index: number) => (
+          <button
+            key={index}
+            onClick={() => onSubmitAnswer(option.score)}
+            className="w-full block bg-white/30 hover:bg-white/40 text-purple-700 font-medium py-3 px-5 rounded-xl shadow-md hover:shadow-lg transform hover:scale-102 transition-all duration-200 text-left text-sm sm:text-base"
+            aria-label={`Answer: ${option.text}`}
+          >
+            {option.text}
+          </button>
+        ))}
+      </div>
+      <div 
+        ref={adContainerRef}
+        className="mt-8 flex justify-center mx-auto"
+        style={{ width: '468px', height: '60px' }} // Reserve space for the ad
+        aria-live="polite"
+        aria-label="Advertisement"
+      />
+    </div>
+  );
+};
+
+export default QuestionScreen;

@@ -1,0 +1,100 @@
+
+import React, { useEffect, useRef } from 'react';
+import { HeartIcon } from './icons/HeartIcon';
+
+interface ResultsScreenProps {
+  score: number;
+  partner1Name: string;
+  partner2Name: string;
+  onRestart: () => void;
+}
+
+const ResultsScreen: React.FC<ResultsScreenProps> = ({ score, partner1Name, partner2Name, onRestart }) => {
+  const getResultMessage = (): string => {
+    if (score >= 85) {
+      return `Wow, ${partner1Name} & ${partner2Name}! Your love harmony is off the charts! You're practically soulmates, radiating warmth and understanding. Truly legendary!`;
+    } else if (score >= 65) {
+      return `Sweet harmony, ${partner1Name} & ${partner2Name}! Your love is a beautiful melody. Keep nurturing those wonderful notes of connection and joy.`;
+    } else if (score >= 40) {
+      return `A lovely tune, ${partner1Name} & ${partner2Name}! Your connection is growing. Keep communicating and cherishing each other to build an even stronger symphony of love.`;
+    } else {
+      return `Every great love story has its unique rhythm, ${partner1Name} & ${partner2Name}. This is a chance to explore and deepen your connection. Keep the music playing!`;
+    }
+  };
+  
+  const adContainerRef = useRef<HTMLDivElement>(null);
+  const adScriptKey = '335dbfb16faf973bd2007ed03f552ceb';
+  // Use the same global variable name as QuestionScreen, as the ad script key is the same.
+  // The ad script invoke.js associated with a specific key likely expects a consistently named options object.
+  const adOptionsGlobalVarName = `atOptions_${adScriptKey}`;
+
+
+  useEffect(() => {
+    const adContainer = adContainerRef.current;
+    if (!adContainer) return;
+    
+    // Ensure the container is empty before adding new ad elements
+    adContainer.innerHTML = '';
+
+    // 1. Set options on the window object
+    (window as any)[adOptionsGlobalVarName] = {
+      'key': adScriptKey,
+      'format': 'iframe',
+      'height': 60,
+      'width': 468,
+      'params': {}
+    };
+
+    // 2. Create and append the ad script
+    const script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = `//www.highperformanceformat.com/${adScriptKey}/invoke.js`;
+    script.async = true;
+
+    adContainer.appendChild(script);
+    const currentScript = script; // Capture script for cleanup
+
+    return () => {
+      // Cleanup on component unmount
+      if (currentScript && currentScript.parentNode === adContainer) {
+        adContainer.removeChild(currentScript);
+      }
+       // Clean up the ad container's content (e.g., iframes left by the script)
+      if (adContainer) {
+         adContainer.innerHTML = '';
+      }
+      delete (window as any)[adOptionsGlobalVarName];
+    };
+  }, [adOptionsGlobalVarName]); // Re-run if adOptionsGlobalVarName changes
+
+  return (
+    <div className="animate-fadeIn flex flex-col items-center">
+      <HeartIcon className="w-20 h-20 text-red-500 mb-4 animate-bounce" />
+      <h2 className="text-3xl sm:text-4xl font-bold mb-2 text-purple-700">Your Love Harmony Score!</h2>
+      <p 
+        className="text-6xl sm:text-7xl font-extrabold my-4 bg-clip-text text-transparent bg-gradient-to-r from-yellow-300 via-orange-400 to-red-400 drop-shadow-md"
+        aria-label={`Love score: ${score} percent`}
+      >
+        {score}%
+      </p>
+      <p className="text-lg sm:text-xl mb-8 max-w-lg text-slate-700 leading-relaxed">
+        {getResultMessage()}
+      </p>
+      <button
+        onClick={onRestart}
+        className="bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transform hover:scale-105 transition-all duration-300 text-lg"
+      >
+        Play Again?
+      </button>
+       <div 
+        ref={adContainerRef}
+        className="mt-8 flex justify-center mx-auto"
+        style={{ width: '468px', height: '60px' }} // Reserve space for the ad
+        aria-live="polite"
+        aria-label="Advertisement"
+      />
+    </div>
+  );
+};
+
+export default ResultsScreen;
